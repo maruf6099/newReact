@@ -49,9 +49,9 @@ export default function PostFormModal({ isOpen, closeModal, post }: Props) {
 
     const data = new FormData();
     data.append("title", formData.title);
-    data.append("content", formData.description);
+    data.append("description", formData.description);
     if (selectedFile) {
-      data.append("picture", selectedFile);
+      data.append("banner_image", selectedFile);
     }
     
     if (post?.id) {
@@ -89,6 +89,7 @@ export default function PostFormModal({ isOpen, closeModal, post }: Props) {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-xl">
         <h2 className="text-lg font-semibold mb-4">{post ? "Edit Post" : "Add Post"}</h2>
         <form onSubmit={handleSubmit} encType="multipart/form-data">
+        @csrf
           <div className="mb-3">
             <label className="block text-sm font-medium">Title</label>
             <input
@@ -103,7 +104,7 @@ export default function PostFormModal({ isOpen, closeModal, post }: Props) {
           <div className="mb-3">
             <label className="block text-sm font-medium">Content</label>
             <textarea
-              name="content"
+              name="description"
               value={formData.description}
               onChange={handleChange}
               className="w-full border rounded p-2"
@@ -114,7 +115,7 @@ export default function PostFormModal({ isOpen, closeModal, post }: Props) {
             <label className="block text-sm font-medium">Picture (optional)</label>
             <input
               type="file"
-              name="picture"
+              name="banner_image"
               onChange={handleFileChange}
               className="w-full"
               accept="image/*"
