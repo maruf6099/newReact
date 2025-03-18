@@ -1,35 +1,82 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { useState } from 'react';
+import { Head, router, usePage } from '@inertiajs/react';
+//import PostFromModel from "@components/PostFromModel";  {/* সঠিকভাবে import */}
+import PostFormModel from "@/components/PostFormModel";  
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Posts',
-        href: '/posts',
-    },
-];
+export default function Post() {
+    const { posts } = usePage<{ posts: { id: number; title: string; description: string; banner_image?: string }[] }>().props;
 
-export default function Dashboard() {
+    // selectPost স্টেটটি এখানে null অথবা Post অবজেক্ট হতে পারে
+    const [selectPost, setSelectPost] = useState<{ id: number; title: string; description: string; banner_image?: string } | null>(null);
+    const [isModelOpen, setIsModelOpen] = useState(false);
+
+    const openModel = (post: { id: number; title: string; description: string; banner_image?: string } | null) => {
+        setSelectPost(post);  // এখন এখানে `post` বা `null` পাঠানো যেতে পারে
+        setIsModelOpen(true);
+    };
+
+//     const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [selectedPost, setSelectedPost] = useState(null);
+
+//   const openModal = (post = null) => {
+//     setSelectedPost(post);
+//     setIsModalOpen(true);
+//   };
+
+    const handleDelete = (id: number) => {
+        router.delete(`/posts/${id}`, {
+            onSuccess: () => {
+                router.reload();
+            },
+            onError: () => {
+                console.error("Failed to delete post");
+            }
+        });
+    };
+
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
+        <AppLayout>
+            <Head title="Posts" />
+
+            <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl">
+                <div className="flex justify-end">
+                    <button onClick={() => openModel(null)} className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition">
+                        Add Post
+                    </button>
                 </div>
-                <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
+
+                <table className="w-full border-collapse bg-white text-black shadow-sm rounded-lg">
+                    <thead>
+                        <tr className="bg-gray-100 text-gray-800 border-b">
+                            {["Picture", "Title", "Content", "Actions"].map((header) => (
+                                <th key={header} className="border p-3 text-left">{header}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {posts.length ? (
+                            posts.map((post) => (
+                                <tr key={post.id} className="border-b">
+                                    <td className="p-3">
+                                        {post.banner_image ? <img src={post.banner_image} alt="Post" className="w-16 h-16 object-cover rounded-full" /> : "No Picture"}
+                                    </td>
+                                    <td className="p-3">{post.title}</td>
+                                    <td className="p-3">{post.description}</td>
+                                    <td className="p-3 flex gap-2">
+                                        <button onClick={() => openModel(post)} className="bg-blue-500 text-sm text-white px-3 py-1 rounded">Edit</button>
+                                        <button onClick={() => handleDelete(post.id)} className="bg-red-500 text-sm text-white px-3 py-1 rounded">Delete</button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr><td colSpan={4} className="text-center p-4 text-gray-600">No posts found.</td></tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
+
+            <PostFormModel isOpen={isModelOpen} closeModal={() => setIsModelOpen(false)} post={selectPost} />
         </AppLayout>
     );
 }
