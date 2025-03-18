@@ -3,6 +3,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 //import PostFromModel from "@components/PostFromModel";  {/* সঠিকভাবে import */}
 import PostFormModel from "@/components/PostFormModel";  
 import AppLayout from '@/layouts/app-layout';
+import {Toaster,toast} from "sonner";
 
 export default function Post() {
     const { posts } = usePage<{ posts: { id: number; title: string; description: string; banner_image?: string }[] }>().props;
@@ -27,9 +28,11 @@ export default function Post() {
     const handleDelete = (id: number) => {
         router.delete(`/posts/${id}`, {
             onSuccess: () => {
+                toast.success("Post delete successfully");
                 router.reload();
             },
             onError: () => {
+                toast.success("Post failed delete");
                 console.error("Failed to delete post");
             }
         });
@@ -38,7 +41,7 @@ export default function Post() {
     return (
         <AppLayout>
             <Head title="Posts" />
-
+<Toaster position='top-right'richColors/>
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl">
                 <div className="flex justify-end">
                     <button onClick={() => openModel(null)} className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition">

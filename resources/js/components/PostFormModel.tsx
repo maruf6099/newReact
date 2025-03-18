@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
+import {Toaster,toast} from "sonner";
  
 interface Post {
   id?: number;
@@ -53,29 +54,32 @@ export default function PostFormModal({ isOpen, closeModal, post }: Props) {
     if (selectedFile) {
       data.append("banner_image", selectedFile);
     }
+
+    const successMessage=post?.id?"post updated successfully":"Post created successfully";
+    const errorMessage=post?.id?"post failed to updated ":"Post failed to created";
     
     if (post?.id) {
       data.append("_method", "PUT");
       router.post(`/posts/${post.id}`, data, {
         onSuccess: () => {
- 
+            toast.success(successMessage);
           closeModal();
           router.reload();
         },
         onError: (errors) => {
- 
+            toast.success(errorMessage);
           console.error(errors.message || "Failed to submit post.");
         },
       });
     } else {
       router.post("/posts", data, {
         onSuccess: () => {
- 
+            toast.success(successMessage);
           closeModal();
           router.reload();
         },
         onError: (errors) => {
- 
+            toast.success(errorMessage);
           console.error(errors.message || "Failed to submit post.");
         },
       });
@@ -89,7 +93,7 @@ export default function PostFormModal({ isOpen, closeModal, post }: Props) {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-xl">
         <h2 className="text-lg font-semibold mb-4">{post ? "Edit Post" : "Add Post"}</h2>
         <form onSubmit={handleSubmit} encType="multipart/form-data">
-        @csrf
+       
           <div className="mb-3">
             <label className="block text-sm font-medium">Title</label>
             <input
